@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSec Insights – Vulnerabilities & Authenticity</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #f5f7fa;
+      color: #1e293b;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      padding: 2.5rem 0;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      font-size: 2.7rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      margin-top: 0.5rem;
+    }
+    nav {
+      background: #1e293b;
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    nav a {
+      color: #e2e8f0;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    nav a:hover {
+      color: #38bdf8;
+    }
+    section {
+      padding: 3rem 0;
+      border-bottom: 1px solid #cbd5e1;
+    }
+    section:last-child {
+      border-bottom: none;
+    }
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      color: #0f172a;
+      border-left: 5px solid #3b82f6;
+      padding-left: 1rem;
+    }
+    h3 {
+      font-size: 1.6rem;
+      margin: 1.5rem 0 1rem;
+      color: #1e293b;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .card h4 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #2563eb;
+    }
+    .badge {
+      background: #e2e8f0;
+      color: #334155;
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      align-self: flex-start;
+    }
+    .suggestion {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      border-radius: 0 0.5rem 0.5rem 0;
+      font-size: 0.95rem;
+    }
+    .suggestion strong {
+      color: #166534;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .vuln-list {
+      list-style: none;
+      margin: 0.5rem 0;
+    }
+    .vuln-list li {
+      margin-bottom: 0.5rem;
+      padding-left: 1.8rem;
+      position: relative;
+    }
+    .vuln-list li::before {
+      content: "⚠️";
+      position: absolute;
+      left: 0;
+      color: #d97706;
+    }
+    .authenticity-tips {
+      background: #f0f9ff;
+      border-radius: 1rem;
+      padding: 2rem;
+    }
+    .tip-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .tip-icon {
+      font-size: 2rem;
+      min-width: 2.5rem;
+    }
+    .tip-content {
+      flex: 1;
+    }
+    .tip-content p {
+      margin-top: 0.3rem;
+      color: #334155;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    th {
+      background: #1e293b;
+      color: white;
+      padding: 0.8rem;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    td {
+      padding: 0.8rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .footer {
+      background: #0f172a;
+      color: #94a3b8;
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 2rem;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .tools-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .tool-tag {
+      background: #e2e8f0;
+      padding: 0.3rem 1rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+    }
+    .callout {
+      background: #fef9c3;
+      border-left: 4px solid #eab308;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 1.5rem 0;
+    }
+    .checklist {
+      background: #ecfeff;
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+    }
+    .checklist h3 {
+      margin-top: 0;
+    }
+    .checklist-group {
+      margin: 1.2rem 0;
+      padding: 1rem;
+      background: #e0f2fe;
+      border-radius: 0.75rem;
+    }
+    .checklist-group legend {
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    .checklist-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.5rem 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .checklist-item label {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+      font-size: 0.95rem;
+      color: #0f172a;
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 0.15rem;
+    }
+    .checklist-summary {
+      margin-top: 1.2rem;
+      padding: 1rem 1.2rem;
+      border-radius: 0.75rem;
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      color: #14532d;
+      font-size: 0.95rem;
+    }
+    .checklist-summary span {
+      font-weight: 600;
+    }
+    .checklist-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    .checklist-controls label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      color: #1e293b;
+    }
+    .select-input {
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.375rem;
+      border: 1px solid #cbd5e1;
+      background: white;
+      font-size: 0.9rem;
+      min-width: 180px;
+    }
+    .risk-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #fee2e2;
+      color: #b91c1c;
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    @media (max-width: 600px) {
+      header h1 { font-size: 2rem; }
+      nav ul { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>🔒 WebSec Insights</h1>
+      <p>Exploring every facet of website vulnerabilities & authenticity – with actionable suggestions</p>
+    </div>
+  </header>
+
+  <nav>
+    <ul>
+      <li><a href="#intro">Intro</a></li>
+      <li><a href="#vulns">Vulnerabilities</a></li>
+      <li><a href="#authenticity">Authenticity</a></li>
+      <li><a href="#by-type">By Website Type</a></li>
+      <li><a href="#checklist">Checklist</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#best-practices">Best Practices</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <!-- INTRODUCTION -->
+    <section id="intro">
+      <h2>🔍 Understanding Website Vulnerabilities & Authenticity</h2>
+      <p>Every website, from a simple blog to a banking portal, faces threats. <strong>Vulnerabilities</strong> are weaknesses that attackers exploit. <strong>Authenticity</strong> refers to whether a website is trustworthy and genuine — not a phishing or fake site. This guide explores both dimensions for all types of websites and provides clear, actionable suggestions for each risk.</p>
+      <div class="card-grid">
+        <div class="card">
+          <span class="badge">Did you know?</span>
+          <h4>95% of web apps have some vulnerability</h4>
+          <p>According to various studies, the majority of websites contain at least one security flaw, often due to outdated software or misconfigurations.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Regular automated scanning and manual penetration testing can uncover these flaws before attackers do.</div>
+        </div>
+        <div class="card">
+          <span class="badge">Did you know?</span>
+          <h4>Phishing sites mimic authenticity</h4>
+          <p>Attackers create fake websites that look identical to real ones. Checking SSL certificates, domain age, and contact info helps verify authenticity.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Always double-check the URL and use browser extensions that warn about known phishing sites.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VULNERABILITIES SECTION (OWASP TOP 10 + MORE) -->
+    <section id="vulns">
+      <h2>⚠️ Common Website Vulnerabilities & How to Fix Them</h2>
+      <p>Based on the OWASP Top 10 and real-world exploits, here are the most critical vulnerabilities you should know, along with mitigation suggestions.</p>
+      <div class="card-grid">
+        <div class="card">
+          <h4>SQL Injection (SQLi)</h4>
+          <p>Attackers insert malicious SQL queries into input fields, gaining unauthorized access to the database. Can lead to data theft, deletion, or authentication bypass.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Use parameterized queries / prepared statements. Apply strict input validation and use an ORM framework. Limit database privileges.</div>
+        </div>
+        <div class="card">
+          <h4>Cross-Site Scripting (XSS)</h4>
+          <p>Injecting client-side scripts into web pages viewed by others. Stored XSS (persistent) and Reflected XSS are common, leading to session hijacking or defacement.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Sanitize all user input (output encoding). Implement Content Security Policy (CSP). Use frameworks that auto-escape (e.g., React, Angular).</div>
+        </div>
+        <div class="card">
+          <h4>Cross-Site Request Forgery (CSRF)</h4>
+          <p>Forces a logged-in user to execute unwanted actions on a web application (e.g., changing email, transferring funds) without their consent.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Use anti-CSRF tokens in forms and state-changing requests. Implement SameSite cookies (Lax or Strict).</div>
+        </div>
+        <div class="card">
+          <h4>Broken Authentication</h4>
+          <p>Weak password policies, session fixation, or exposed credentials allow attackers to impersonate users. Includes credential stuffing attacks.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Enforce strong passwords and MFA. Use secure session management (random session IDs, HttpOnly flags). Limit login attempts.</div>
+        </div>
+        <div class="card">
+          <h4>Security Misconfiguration</h4>
+          <p>Default passwords, unnecessary features enabled, directory listing, or verbose error messages that leak information.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Harden server configuration, disable unnecessary services, remove default accounts, and customize error pages.</div>
+        </div>
+        <div class="card">
+          <h4>Sensitive Data Exposure</h4>
+          <p>Failure to encrypt sensitive data (passwords, credit cards) in transit or at rest. Also includes weak cryptographic algorithms.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Use HTTPS everywhere, encrypt sensitive data at rest (AES-256), avoid outdated ciphers, and hash passwords with bcrypt/Argon2.</div>
+        </div>
+        <div class="card">
+          <h4>XML External Entities (XXE)</h4>
+          <p>Old but still present: XML processors that allow external entity references can expose internal files or cause SSRF.</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Disable external entity processing in XML parsers. Use less complex data formats like JSON.</div>
+        </div>
+        <div class="card">
+          <h4>Broken Access Control</h4>
+          <p>Users can access resources or functions they shouldn't (e.g., viewing other users' private data, admin pages without proper checks).</p>
+          <div class="suggestion"><strong>🛡️ Suggestion:</strong> Implement server-side access control checks; deny by default. Test with different user roles.</div>
+        </div>
+      </div>
+      <p><em>...and many more: Remote Code Execution (RCE), Local/Remote File Inclusion (LFI/RFI), HTTP Parameter Pollution, etc. Always follow secure coding guidelines.</em></p>
+    </section>
+
+    <!-- AUTHENTICITY CHECK SECTION -->
+    <section id="authenticity">
+      <h2>🛡️ How to Verify Website Authenticity & What to Do</h2>
+      <div class="authenticity-tips">
+        <div class="tip-item">
+          <span class="tip-icon">🔐</span>
+          <div class="tip-content"><strong>Check SSL/TLS certificate</strong> — Look for HTTPS and a valid certificate (click the padlock). Extended Validation (EV) shows company name in address bar.<br>
+          <p>✅ <em>Suggestion:</em> If a site lacks HTTPS or the certificate is invalid, do not enter any personal information. Use a secure connection tool like HTTPS Everywhere.</p></div>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">🌐</span>
+          <div class="tip-content"><strong>Domain name scrutiny</strong> — Misspellings, extra words (e.g., "paypal-security.com") often indicate phishing. Check domain age via WHOIS (older domains are generally more trustworthy).<br>
+          <p>✅ <em>Suggestion:</em> Use WHOIS lookup tools (like whois.domaintools.com) to check domain creation date. Report suspicious domains to Google Safe Browsing.</p></div>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">📞</span>
+          <div class="tip-content"><strong>Contact information & presence</strong> — Legitimate sites provide physical address, phone, and support. Verify via external searches.<br>
+          <p>✅ <em>Suggestion:</em> Call the provided number or search for independent reviews. If contact info seems fake or missing, avoid the site.</p></div>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">⭐</span>
+          <div class="tip-content"><strong>Trust seals & reviews</strong> — Look for Norton, McAfee, BBB seals, but click them to ensure they're genuine. Check third-party reviews (Trustpilot, Sitejabber).<br>
+          <p>✅ <em>Suggestion:</em> If a seal is not clickable or leads nowhere, it's likely fake. Cross-check with the seal provider's official list.</p></div>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">📰</span>
+          <div class="tip-content"><strong>Content quality & consistency</strong> — Poor grammar, broken links, or outdated design can be red flags. Compare with official sources.<br>
+          <p>✅ <em>Suggestion:</em> When in doubt, manually type the official URL instead of clicking links from emails or ads.</p></div>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon">🔍</span>
+          <div class="tip-content"><strong>Use online tools</strong> — Google Safe Browsing, VirusTotal, or URL scanners can detect malicious sites.<br>
+          <p>✅ <em>Suggestion:</em> Before visiting a suspicious link, copy and paste the URL into VirusTotal to see if it's flagged by any security vendor.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VULNERABILITIES BY WEBSITE TYPE -->
+    <section id="by-type">
+      <h2>🌐 Vulnerabilities by Website Type & Tailored Suggestions</h2>
+      <p>Different types of websites face unique threats. Here's a breakdown with specific mitigation advice:</p>
+      <table>
+        <thead><tr><th>Website Type</th><th>Common Vulnerabilities</th><th>Why?</th><th>Suggestions</th></tr></thead>
+        <tbody>
+          <tr><td><strong>E‑commerce</strong></td><td>Payment data exposure, SQLi, CSRF, broken authentication</td><td>Handles financial info, high-value transactions</td><td>Use PCI DSS compliant payment gateways, tokenization, and regular security audits.</td></tr>
+          <tr><td><strong>Social Media</strong></td><td>XSS, broken access control (viewing private posts), account takeover</td><td>Large user base, sensitive personal data</td><td>Implement strict CORS, rate limiting, and offer users security features like login alerts.</td></tr>
+          <tr><td><strong>Banking/Fintech</strong></td><td>Session fixation, insecure direct object references, MITM</td><td>Direct financial impact, regulatory requirements</td><td>Mandatory MFA, short session timeouts, end-to-end encryption, and regular third-party audits.</td></tr>
+          <tr><td><strong>Government/Public</strong></td><td>Misconfiguration, outdated software, DDoS, defacement</td><td>High visibility, potential disruption of services</td><td>Adopt zero-trust architecture, continuous monitoring, and keep software patched via automated tools.</td></tr>
+          <tr><td><strong>Healthcare</strong></td><td>Data exposure (patient records), weak encryption, insider threats</td><td>Highly sensitive data, strict compliance (HIPAA)</td><td>Encrypt all PHI, enforce strict access logs, and conduct regular security training for staff.</td></tr>
+          <tr><td><strong>Blogs/Content</strong></td><td>XSS, comment spam, plugin vulnerabilities (WordPress)</td><td>Often outdated CMS, third-party plugins</td><td>Keep CMS and plugins updated, use a Web Application Firewall (WAF), and disable unused plugins.</td></tr>
+          <tr><td><strong>Educational</strong></td><td>Broken authentication, data leaks (student info), insecure file uploads</td><td>Mixed technical expertise, legacy systems</td><td>Implement role-based access, scan uploaded files, and use secure authentication (SAML/OAuth).</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- INTERACTIVE CHECKLIST -->
+    <section id="checklist">
+      <h2>✅ Practical Vulnerability Checklist & Options</h2>
+      <p>Use this interactive checklist to quickly review the most important web vulnerabilities and authenticity checks. You can <strong>check all vulnerabilities</strong> at once or focus on specific areas that matter to your site.</p>
+      <div class="checklist">
+        <h3>1. Context for Your Check</h3>
+        <div class="checklist-controls">
+          <label>
+            <span>Website URL:</span>
+            <input id="websiteUrl" type="text" class="select-input" placeholder="https://example.com">
+          </label>
+          <button id="analyzeSiteBtn" type="button">Analyze website</button>
+          <label>
+            <span>Website type:</span>
+            <select id="siteType" class="select-input">
+              <option value="generic">General website</option>
+              <option value="ecommerce">E‑commerce / Online shop</option>
+              <option value="banking">Banking / Fintech</option>
+              <option value="social">Social media / Community</option>
+              <option value="gov">Government / Public sector</option>
+              <option value="health">Healthcare</option>
+              <option value="blog">Blog / CMS (e.g., WordPress)</option>
+              <option value="edu">Educational / University</option>
+            </select>
+          </label>
+          <label>
+            <span>Risk focus:</span>
+            <select id="riskFocus" class="select-input">
+              <option value="balanced">Balanced</option>
+              <option value="auth">Authentication & sessions</option>
+              <option value="data">Sensitive data & privacy</option>
+              <option value="input">Input validation & injections</option>
+              <option value="config">Server & infrastructure</option>
+            </select>
+          </label>
+          <label>
+            <input type="checkbox" id="checkAllVulns">
+            <span><strong>Check all vulnerabilities</strong></span>
+          </label>
+        </div>
+        <h3 style="margin-top:1.5rem;">2. Vulnerability Coverage</h3>
+        <fieldset class="checklist-group">
+          <legend>Core technical vulnerabilities</legend>
+          <div class="checklist-options" id="vulnChecklist">
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="sqli">
+                <span>SQL Injection (SQLi) prevented with parameterized queries and strict ORM usage.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="xss">
+                <span>Cross-Site Scripting (XSS) mitigated with proper output encoding and CSP.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="csrf">
+                <span>Cross-Site Request Forgery (CSRF) protected with anti-CSRF tokens and SameSite cookies.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="auth">
+                <span>Authentication hardened (MFA, rate limiting, secure session IDs, no default credentials).</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="access">
+                <span>Access control enforced server‑side with least privilege and role‑based checks.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="data">
+                <span>Sensitive data encrypted in transit (HTTPS) and at rest with modern algorithms.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="config">
+                <span>Security misconfigurations eliminated (no default passwords, minimal services, safe error pages).</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="upload">
+                <span>File uploads validated, scanned, and stored safely (no direct execution from upload directories).</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="deps">
+                <span>Dependencies and plugins kept updated; vulnerability scanning (SCA) integrated into CI/CD.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="logging">
+                <span>Security logging and monitoring in place with alerting for suspicious activity.</span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="checklist-group">
+          <legend>Authenticity & trust signals</legend>
+          <div class="checklist-options">
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="ssl">
+                <span>Valid SSL/TLS certificate configured correctly (no mixed‑content or weak ciphers).</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="domain">
+                <span>Domain name and WHOIS details look legitimate; no typosquatting concerns.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="contact">
+                <span>Clear, verifiable contact and company information is present and consistent.</span>
+              </label>
+            </div>
+            <div class="checklist-item">
+              <label>
+                <input type="checkbox" class="vuln-item" value="privacy">
+                <span>Up‑to‑date privacy policy, terms of service, and cookie banner (where required).</span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+        <div class="checklist-summary" id="checklistSummary">
+          <span id="completedVulns">0</span> out of <span id="totalVulns">0</span> checks completed. Start by entering a website URL, selecting the closest website type, and then review each vulnerability item above.
+        </div>
+        <div class="checklist-summary" id="externalChecksSummary" style="margin-top:0.75rem; background:#eff6ff; border-left-color:#3b82f6;">
+          Paste any website URL above and click "Analyze website" to generate quick links for SSL check, malware/URL reputation, and WHOIS/domain info.
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLS & RESOURCES -->
+    <section id="tools">
+      <h2>🛠️ Tools for Testing Vulnerabilities & Authenticity</h2>
+      <div class="tools-list">
+        <span class="tool-tag">🔧 OWASP ZAP</span>
+        <span class="tool-tag">🕸️ Burp Suite</span>
+        <span class="tool-tag">🧪 Nmap</span>
+        <span class="tool-tag">🔍 Nikto</span>
+        <span class="tool-tag">📡 Wireshark</span>
+        <span class="tool-tag">🔐 SSL Labs</span>
+        <span class="tool-tag">🌐 Shodan</span>
+        <span class="tool-tag">📋 Metasploit</span>
+        <span class="tool-tag">✅ VirusTotal</span>
+        <span class="tool-tag">🔎 Google Safe Browsing</span>
+        <span class="tool-tag">📧 Have I Been Pwned</span>
+        <span class="tool-tag">📑 WHOIS lookup</span>
+      </div>
+      <div class="callout">
+        <strong>💡 Suggestion:</strong> Use a combination of automated scanners (like OWASP ZAP) and manual checks. For authenticity, browser extensions like uBlock Origin and Netcraft can help flag malicious sites.
+      </div>
+    </section>
+
+    <!-- BEST PRACTICES -->
+    <section id="best-practices">
+      <h2>✅ Best Practices for Secure & Authentic Websites</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h4>For Developers</h4>
+          <ul class="vuln-list">
+            <li>Input validation & parameterized queries</li>
+            <li>Use HTTPS with strong ciphers</li>
+            <li>Implement proper authentication (MFA, strong passwords)</li>
+            <li>Keep software & libraries updated</li>
+            <li>Apply principle of least privilege</li>
+            <li>Regular security testing & code reviews</li>
+          </ul>
+          <div class="suggestion"><strong>🔧 Suggestion:</strong> Integrate security into the CI/CD pipeline (SAST/DAST tools) to catch issues early.</div>
+        </div>
+        <div class="card">
+          <h4>For Users (Authenticity)</h4>
+          <ul class="vuln-list">
+            <li>Verify HTTPS & certificate details</li>
+            <li>Double-check URLs before entering credentials</li>
+            <li>Use password managers to avoid phishing</li>
+            <li>Enable two-factor authentication</li>
+            <li>Keep browser & antivirus updated</li>
+          </ul>
+          <div class="suggestion"><strong>🔧 Suggestion:</strong> Bookmark frequently visited sites to avoid mistyped URLs, and report phishing attempts to anti-phishing organizations.</div>
+        </div>
+        <div class="card">
+          <h4>For Site Owners</h4>
+          <ul class="vuln-list">
+            <li>Conduct regular vulnerability scans</li>
+            <li>Use Web Application Firewalls (WAF)</li>
+            <li>Monitor for domain infringements (typosquatting)</li>
+            <li>Educate employees about phishing</li>
+            <li>Have an incident response plan</li>
+          </ul>
+          <div class="suggestion"><strong>🔧 Suggestion:</strong> Subscribe to threat intelligence feeds and consider a bug bounty program to crowdsource security research.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE DEMO (simple expandable) -->
+    <section>
+      <h2>🧪 Quick Interactive Check</h2>
+      <p>Click below to see a sample vulnerability explanation (XSS demo concept) and its suggestion.</p>
+      <button id="demoBtn">Show XSS Example</button>
+      <div id="demoPanel" style="display:none; margin-top:1rem; background:#fff4e6; padding:1rem; border-radius:0.5rem;">
+        <strong>Reflected XSS Example:</strong> A website echoes user input without sanitization. If an attacker crafts a URL like <code>https://example.com/search?q=&lt;script&gt;alert('XSS')&lt;/script&gt;</code>, the script runs in the victim's browser.<br>
+        <div class="suggestion" style="margin-top:0.8rem;"><strong>🛡️ Suggestion:</strong> Always sanitize user input on the server side and use output encoding. Implement a Content Security Policy to block inline scripts.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 WebSec Insights — Educational resource on website vulnerabilities & authenticity. Not a substitute for professional security advice.</p>
+    <p style="margin-top:0.5rem;">🔒 Stay curious, stay safe.</p>
+  </footer>
+
+  <script>
+    // Simple toggle for demo
+    document.getElementById('demoBtn').addEventListener('click', function() {
+      const panel = document.getElementById('demoPanel');
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        this.textContent = 'Hide XSS Example';
+      } else {
+        panel.style.display = 'none';
+        this.textContent = 'Show XSS Example';
+      }
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Checklist logic + "check any website" helper
+    (function() {
+      const vulnItems = Array.from(document.querySelectorAll('.vuln-item'));
+      const totalSpan = document.getElementById('totalVulns');
+      const completedSpan = document.getElementById('completedVulns');
+      const checkAll = document.getElementById('checkAllVulns');
+      const siteType = document.getElementById('siteType');
+      const riskFocus = document.getElementById('riskFocus');
+      const summary = document.getElementById('checklistSummary');
+      const websiteUrlInput = document.getElementById('websiteUrl');
+      const analyzeBtn = document.getElementById('analyzeSiteBtn');
+      const externalSummary = document.getElementById('externalChecksSummary');
+
+      if (!vulnItems.length || !totalSpan || !completedSpan || !checkAll || !summary) return;
+
+      totalSpan.textContent = vulnItems.length.toString();
+
+      function updateCompleted() {
+        const completed = vulnItems.filter(i => i.checked).length;
+        completedSpan.textContent = completed.toString();
+
+        let context = '';
+        const type = siteType ? siteType.value : 'generic';
+        const focus = riskFocus ? riskFocus.value : 'balanced';
+
+        if (type === 'ecommerce') {
+          context += 'For e‑commerce, pay special attention to payment data exposure, CSRF, and broken authentication. ';
+        } else if (type === 'banking') {
+          context += 'For banking/fintech, session security and strong encryption are critical. ';
+        } else if (type === 'social') {
+          context += 'For social platforms, focus on access control, XSS, and account takeover risks. ';
+        } else if (type === 'health') {
+          context += 'For healthcare, prioritize data privacy, access logs, and insider‑threat protections. ';
+        }
+
+        if (focus === 'auth') {
+          context += 'Ensure login, session, and MFA flows are thoroughly tested.';
+        } else if (focus === 'data') {
+          context += 'Double‑check encryption, backups, and data‑handling practices.';
+        } else if (focus === 'input') {
+          context += 'Review all inputs, queries, and encoding to prevent injections and XSS.';
+        } else if (focus === 'config') {
+          context += 'Harden server, framework, and cloud configuration against common misconfigurations.';
+        }
+
+        if (!context) {
+          context = 'Use this checklist regularly and combine it with automated scanning tools.';
+        }
+
+        // Keep the summary element but only update its text parts
+        const textNodes = summary.childNodes;
+        const statusText = ' checks completed. ' + context;
+        if (textNodes.length >= 3 && textNodes[2].nodeType === Node.TEXT_NODE) {
+          textNodes[2].textContent = statusText;
+        } else {
+          summary.appendChild(document.createTextNode(statusText));
+        }
+      }
+
+      vulnItems.forEach(item => {
+        item.addEventListener('change', () => {
+          if (!item.checked && checkAll.checked) {
+            checkAll.checked = false;
+          }
+          updateCompleted();
+        });
+      });
+
+      checkAll.addEventListener('change', () => {
+        vulnItems.forEach(i => { i.checked = checkAll.checked; });
+        updateCompleted();
+      });
+
+      if (siteType) siteType.addEventListener('change', updateCompleted);
+      if (riskFocus) riskFocus.addEventListener('change', updateCompleted);
+
+      function normalizeUrl(raw) {
+        if (!raw) return '';
+        let url = raw.trim();
+        if (!/^https?:\/\//i.test(url)) {
+          url = 'https://' + url;
+        }
+        try {
+          return new URL(url).toString();
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function inferSiteTypeFromHost(host) {
+        const h = host.toLowerCase();
+        if (/(shop|store|cart|checkout|pay|payment)/.test(h)) return 'ecommerce';
+        if (/(bank|finance|pay|wallet)/.test(h)) return 'banking';
+        if (/(social|chat|community|forum)/.test(h)) return 'social';
+        if (/(gov|\.gov\.)/.test(h)) return 'gov';
+        if (/(health|clinic|hospital|med|care)/.test(h)) return 'health';
+        if (/(blog|news|cms|wordpress)/.test(h)) return 'blog';
+        if (/(school|college|university|academy|edu|\bedu\b)/.test(h)) return 'edu';
+        return 'generic';
+      }
+
+      function buildExternalLinks(urlObj) {
+        const encodedUrl = encodeURIComponent(urlObj.toString());
+        const host = urlObj.hostname;
+        const encodedHost = encodeURIComponent(host);
+
+        return [
+          '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + encodedHost + '" target="_blank" rel="noopener noreferrer">SSL Labs (TLS & certificate)</a>',
+          '<a href="https://www.virustotal.com/gui/url/' + encodedUrl + '/detection" target="_blank" rel="noopener noreferrer">VirusTotal (URL reputation)</a>',
+          '<a href="https://transparencyreport.google.com/safe-browsing/search?url=' + encodedUrl + '" target="_blank" rel="noopener noreferrer">Google Safe Browsing (phishing/malware)</a>',
+          '<a href="https://who.is/whois/' + encodedHost + '" target="_blank" rel="noopener noreferrer">WHOIS lookup (domain info)</a>',
+          '<a href="https://www.shodan.io/search?query=' + encodedHost + '" target="_blank" rel="noopener noreferrer">Shodan (internet-exposed services)</a>'
+        ];
+      }
+
+      function buildToolResultsHtml(urlObj) {
+        const host = urlObj.hostname;
+        const encodedHost = encodeURIComponent(host);
+        const encodedUrl = encodeURIComponent(urlObj.toString());
+
+        return (
+          '<strong>Tools overview for this site:</strong>' +
+          '<ul style="margin-top:0.5rem; padding-left:1.2rem;">' +
+            '<li><strong>OWASP ZAP</strong> – use as an active/passive scanner against <code>' + host + '</code> from your machine (no direct web link).</li>' +
+            '<li><strong>Burp Suite</strong> – proxy your browser traffic to manually test requests to <code>' + host + '</code>.</li>' +
+            '<li><strong>Nmap</strong> – run <code>nmap ' + host + '</code> from your terminal to discover open ports and services.</li>' +
+            '<li><strong>Nikto</strong> – run <code>nikto -h ' + host + '</code> for common web server misconfigurations.</li>' +
+            '<li><strong>Wireshark</strong> – capture and inspect network traffic while browsing <code>' + host + '</code>.</li>' +
+            '<li><strong>Metasploit</strong> – use relevant modules against identified services on <code>' + host + '</code> (for authorized testing only).</li>' +
+            '<li><strong>SSL Labs</strong> – see detailed TLS report: ' +
+              '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + encodedHost + '" target="_blank" rel="noopener noreferrer">open report</a>.</li>' +
+            '<li><strong>Shodan</strong> – view public exposure for this host: ' +
+              '<a href="https://www.shodan.io/search?query=' + encodedHost + '" target="_blank" rel="noopener noreferrer">search on Shodan</a>.</li>' +
+            '<li><strong>VirusTotal</strong> – full URL scan: ' +
+              '<a href="https://www.virustotal.com/gui/url/' + encodedUrl + '/detection" target="_blank" rel="noopener noreferrer">open on VirusTotal</a>.</li>' +
+            '<li><strong>Google Safe Browsing</strong> – status for this URL: ' +
+              '<a href="https://transparencyreport.google.com/safe-browsing/search?url=' + encodedUrl + '" target="_blank" rel="noopener noreferrer">view transparency report</a>.</li>' +
+            '<li><strong>Have I Been Pwned</strong> – check user emails, not URLs; open ' +
+              '<a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer">Have I Been Pwned</a> and test email addresses used on this site.</li>' +
+            '<li><strong>WHOIS lookup</strong> – domain registration info: ' +
+              '<a href="https://who.is/whois/' + encodedHost + '" target="_blank" rel="noopener noreferrer">WHOIS for this domain</a>.</li>' +
+          '</ul>'
+        );
+      }
+
+      function analyzeSite() {
+        if (!websiteUrlInput || !externalSummary) return;
+        const raw = websiteUrlInput.value;
+        const normalized = normalizeUrl(raw);
+
+        if (!normalized) {
+          externalSummary.innerHTML = 'Please enter a valid website URL such as <code>https://example.com</code>.';
+          return;
+        }
+
+        const urlObj = new URL(normalized);
+
+        if (siteType) {
+          siteType.value = inferSiteTypeFromHost(urlObj.hostname);
+        }
+
+        const links = buildExternalLinks(urlObj);
+        externalSummary.innerHTML =
+          'Quick external checks for <code>' + urlObj.toString() + '</code>:<br>' +
+          links.join(' &nbsp;|&nbsp; ') +
+          '<br><br>' +
+          buildToolResultsHtml(urlObj) +
+          '<br>Run these tools where appropriate, then use the checklist above to record all findings.';
+
+        updateCompleted();
+      }
+
+      if (analyzeBtn && websiteUrlInput) {
+        analyzeBtn.addEventListener('click', analyzeSite);
+        websiteUrlInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            analyzeSite();
+          }
+        });
+      }
+
+      updateCompleted();
+    })();
+  </script>
+</body>
+</html>
